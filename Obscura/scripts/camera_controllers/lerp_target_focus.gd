@@ -2,10 +2,12 @@ class_name LerpTargetFocus
 extends CameraControllerBase
 
 
-@export var lead_speed:float = 70.0
-@export var catchup_delay_duration:float = 2.0
+@export var lead_speed:float = 30.0
+@export var catchup_delay_duration:float = 1.0
 @export var catchup_speed:float = 40.0
-@export var leash_distance:float = 10.0
+@export var leash_distance:float = 5.0
+
+var _timer:Timer
 
 
 func _ready() -> void:
@@ -23,20 +25,34 @@ func _process(delta: float) -> void:
 	var tpos = target.global_position
 	var cpos = global_position
 	
+	# get direction of input
 	var input_dir = Vector2(
 		Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left"),
 		Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
 		).limit_length(1.0)
-	
 	var direction = (Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
-	var distance:float = tpos.distance_to(cpos)
-	var unit_vector:Vector3 = (tpos - cpos).normalized()
+	# unit vector between target and camera
+	var distance:float = pow(pow((tpos.x - cpos.x),2) + pow((tpos.z - cpos.z),2),0.5)
+	var dir = Vector3(tpos.x - cpos.x, 0, tpos.z - cpos.z)
+	var unit_vector:Vector3 = dir.normalized()
 	
 	if direction:
-		global_position += direction * lead_speed * delta
+		global_position += direction * (lead_speed + target.velocity.length()) * delta
+		# if starts moving, delete timer
+		if not (_timer == null): 
+			_timer.queue_free()
 	else:
-		global_position += unit_vector * catchup_speed * delta
+		# timer logic
+		if _timer == null and target.velocity.length() == 0:
+			_timer = Timer.new()
+			add_child(_timer)
+			_timer.one_shot = true
+			_timer.start(catchup_delay_duration)
+		if _timer.is_stopped():
+			# catch up
+			global_position.x += (tpos.x - cpos.x) * (catchup_speed * delta)
+			global_position.z += (tpos.z - cpos.z) * (catchup_speed * delta)
 	
 	# leash check
 	if (distance > leash_distance):

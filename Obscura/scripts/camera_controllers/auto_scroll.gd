@@ -2,14 +2,13 @@ class_name AutoScroll
 extends CameraControllerBase
 
 
-@export var top_teft := Vector2(-10,5)
+@export var top_left := Vector2(-10,5)
 @export var bottom_right := Vector2(10,-5)
-@export var autoscroll_speed := Vector3(0.1, 0, 0)
+@export var autoscroll_speed := Vector3(0.1, 0, 0.5)
 
 
 func _ready() -> void:
 	super()
-	position = target.position
 	
 
 func _process(delta: float) -> void:
@@ -22,12 +21,14 @@ func _process(delta: float) -> void:
 	var tpos = target.global_position
 	var cpos = global_position
 	
-	var width:float = bottom_right.x - top_teft.x
-	var height:float = top_teft.y - bottom_right.y
+	var width:float = bottom_right.x - top_left.x
+	var height:float = top_left.y - bottom_right.y
 	
 	#auto scroll
 	global_position.x += autoscroll_speed.x
 	global_position.z += autoscroll_speed.z
+	target.global_position.x += autoscroll_speed.x
+	target.global_position.z += autoscroll_speed.z
 	
 	#boundary checks
 	#left
@@ -58,9 +59,9 @@ func draw_logic() -> void:
 	mesh_instance.mesh = immediate_mesh
 	mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	
-	var left:float = top_teft.x
+	var left:float = top_left.x
 	var right:float = bottom_right.x
-	var top:float = top_teft.y
+	var top:float = top_left.y
 	var bottom:float = bottom_right.y
 	
 	immediate_mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)

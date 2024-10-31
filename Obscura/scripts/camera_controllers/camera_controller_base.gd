@@ -45,3 +45,7 @@ func _process(delta: float) -> void:
 
 func draw_logic() -> void:
 	pass
+	
+func reset_position() -> void:
+	position = target.global_position
+	position += Vector3(0.0, dist_above_target, 0.0) 

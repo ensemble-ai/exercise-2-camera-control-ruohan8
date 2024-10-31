@@ -24,6 +24,7 @@ func _process(_delta):
 			if null != cameras[index]:
 				if index == current_controller:
 					cameras[current_controller].make_current()
+					cameras[current_controller].reset_position() 
 				else:
 					cameras[index].current = false
 					cameras[index].draw_camera_logic = false
@@ -33,7 +34,4 @@ func _process(_delta):
 				if null != cameras[index]:
 					current_controller = index
 					cameras[current_controller].make_current()
-					
-			
-		
-	
+					cameras[current_controller].reset_position() 
